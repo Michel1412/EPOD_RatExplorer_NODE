@@ -10,9 +10,6 @@ export class CreateFile {
     if (!this.isValidParams(fileData)) {
       return Result.fail('Dados para criacao de arquivo inválidos');
     }
-
-    
-
   }
 
   isValidParams(fileData) {

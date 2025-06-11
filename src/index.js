@@ -38,6 +38,9 @@ const handleCommand = async (command) => {
             console.log('Exiting the File Explorer CLI. Goodbye!');
             process.exit();
             break;
+        case 'clean': // Limpa a tela do console
+            console.clear();
+            break;
         default:
             console.log('Unknown command. Type "help" for a list of commands.');
     }
