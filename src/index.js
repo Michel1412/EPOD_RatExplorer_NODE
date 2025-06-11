@@ -1,8 +1,8 @@
 // This file is the entry point of the application. It initializes the file explorer and handles user input from the terminal.
 
-const FileExplorer = require('./explorer');
+import RatExplorer from './service/rat-explorer.js';
 
-const explorer = new FileExplorer();
+const explorer = new RatExplorer();
 
 const runExplorer = async () => {
     console.log('Welcome to the File Explorer CLI!');
