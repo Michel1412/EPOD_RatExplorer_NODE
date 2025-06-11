@@ -4,6 +4,23 @@ export class RatExplorer {
         this.currentPath = `${initialPath || process.cwd()}/test`;
     }
 
+    createDirectory() {
+        const fs = require('fs');
+        const path = require('path');
+
+        const dirName = `dir_${Date.now()}`;
+        const dirPath = path.join(this.currentPath, dirName);
+
+        try {
+            fs.mkdirSync(dirPath);
+            console.log(`Directory created: ${dirPath}`);
+            return dirPath;
+        } catch (error) {
+            console.error('Error creating directory:', error);
+            return null;
+        }
+    }
+
     listFiles() {
         const fs = require('fs');
         const path = require('path');

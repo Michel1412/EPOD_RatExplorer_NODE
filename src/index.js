@@ -1,6 +1,6 @@
 // This file is the entry point of the application. It initializes the file explorer and handles user input from the terminal.
 
-import RatExplorer from './service/rat-explorer.js';
+import {RatExplorer} from './service/rat-explorer.js';
 
 const explorer = new RatExplorer();
 
