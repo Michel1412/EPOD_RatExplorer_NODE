@@ -1,4 +1,4 @@
-class Result {
+export class Result {
     constructor(success, data = null, error = null) {
         this.success = success;
         this.data = data;
@@ -13,5 +13,3 @@ class Result {
         return new Result(false, null, error);
     }
 }
-
-module.exports = Result;

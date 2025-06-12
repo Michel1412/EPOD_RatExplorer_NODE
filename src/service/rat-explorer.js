@@ -1,3 +1,5 @@
+import path from 'path';
+import { GenericTree } from '../domain/generic-tree.js';
 import { CreateFileUseCase } from '../use-cases/create-file.use-case.js';
 import { CreateFolderUseCase } from '../use-cases/create-folder.use-case.js';
 
@@ -7,14 +9,53 @@ export class RatExplorer {
         this.currentPath = `${initialPath || process.cwd()}/test`;
         this.createFileUseCase = new CreateFileUseCase();
         this.createFolderUseCase = new CreateFolderUseCase();
+        this.tree = new GenericTree();
     }
 
-    createFolder() {
-        this.createFolderUseCase.execute();
+    async handleCreateCommand(data) {
+        if (!data || !data.type) {
+            console.error('Favor passar o campo \x1b[1m<type>\x1b[0m => create <type> <name>');
+            return;
+        }
+
+        switch (data.type) {
+            case 'folder':
+            case 'fol':
+                await this.createFolder(data);
+                break;
+            case 'file':
+            case 'fi':
+                this.createFile();
+                break;
+            default:
+                console.error('Unknown type for create command:', data.type);
+        }
+    }
+
+    async createFolder(data) {
+        if (!data || typeof data.name !== 'string') {
+            console.error('Invalid folder data');
+            return;
+        }
+
+        const folderData = {
+            name: data.name,
+            path: data.path || '/'
+        }
+
+        const result = await this.createFolderUseCase.execute(folderData);
+        
+        if (!result.success) {
+            console.error('Error creating folder:', result.error);
+            return;
+        }
+
+        this.syncTree(result.data);
     }
 
     createFile() {
-        this.createFileUseCase.execute();
+        this.tree = this.createFileUseCase.execute();
+        this.syncTree();
 
         const fs = require('fs');
         const path = require('path');
@@ -85,5 +126,14 @@ export class RatExplorer {
             console.error('File not found:', fileName);
             return null;
         }
+    }
+
+    syncTree(tree) {
+        this.tree = tree || this.tree;
+
+        console.log('[RatExplorer] Syncing Tree...');
+        this.createFileUseCase.syncTree(this.tree);
+        this.createFolderUseCase.syncTree(this.tree);
+        console.log('[RatExplorer] Tree: ', JSON.stringify(this.tree, null, 2));
     }
 }

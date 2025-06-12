@@ -5,33 +5,56 @@ import {RatExplorer} from './service/rat-explorer.js';
 const explorer = new RatExplorer();
 
 const runExplorer = async () => {
+    console.clear();
     console.log('Welcome to the File Explorer CLI!');
     console.log('Type "help" for a list of commands.');
 
     process.stdin.on('data', async (data) => {
-        const command = data.toString().trim();
-        await handleCommand(command);
+        const commandParts = data.toString().trim().split(' ');
+        await handleCommand(commandParts);
     });
 };
 
-const handleCommand = async (command) => {
-    switch (command) {
+const handleCommand = async (commandParts) => {
+    switch (commandParts[0]) {
         case 'help':
             console.log('Available commands:');
             console.log('list - List files in the current directory');
+            // FELIPE VALIDA ISSO AQUI           |
+            // FELIPE VALIDA ISSO AQUI           |
+            // FELIPE VALIDA ISSO AQUI           v
+            console.log('create <type> <name> <path> - Create a new folder Types: "folder", "file"');
+            console.log('clean - Clear the console');
             console.log('navigate <path> - Navigate to a different directory');
             console.log('details <file> - Get details of a specific file');
             console.log('exit - Exit the application');
             break;
+        case 'create':
+            const params = commandParts.slice(1);
+
+            if (!params) {
+                console.log('Por favor forneca um nome de uma pasta.');
+                return;
+            }
+
+            const data = {
+                type: params[0],
+                name: params[1],
+                path: params[2] ? params[2] : '/'
+            }
+
+            console.log(`Creating folder: ${JSON.stringify(data)}`);
+            await explorer.handleCreateCommand(data);
+            break;
         case 'list':
             await explorer.listFiles();
             break;
-        case command.startsWith('navigate '):
-            const path = command.split(' ')[1];
+        case commandParts[0].startsWith('navigate '):
+            const path = commandParts[1];
             await explorer.navigateTo(path);
             break;
-        case command.startsWith('details '):
-            const fileName = command.split(' ')[1];
+        case commandParts[0].startsWith('details '):
+            const fileName = commandParts[1];
             await explorer.getFileDetails(fileName);
             break;
         case 'exit':

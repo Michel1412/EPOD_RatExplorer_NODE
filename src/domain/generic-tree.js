@@ -1,42 +1,71 @@
-import { FolderBase } from './folder-base.js';
+import { FolderBase } from "./bases/folder.base.js";
+import {Result} from "./result.js";
 
 export class GenericTree {
+
   constructor() {
-    this.root = new FolderBase();
+    this.root = new FolderBase('/');
   }
 
   setRoot(node) {
     this.root = node;
+    return this;
   }
 
   getRoot() {
+    if (!this.root) {
+      return Result.fail('Pasta inicial não encontrada');
+    }
+
     return this.root;
   }
 
-  addNode(node) {
+  async addNode(node) {
     if (!this.root.leafs) {
       this.root.leafs = new Map();
     }
 
-    this.root.leafs[node.name] = node;
+    this.root = await this.setLeaf(node, node.path, this.root);
+    return Result.ok(this.root);
   }
 
-  findNode(path) {
-    if (!this.root || !this.root.leafs) {
-      return null;
+  async setLeaf(node, path, currentNode) {
+    const parts = path.split('/').slice(1);
+    console.log(`[GenericTree - setLeaf] parts: [${parts}]`);
+
+    const currentPart = parts.shift();
+
+    if (!currentPart) {
+      currentNode.leafs[node.name] = node;
+      return currentNode;
     }
 
-    const parts = path.split('/');
+    if (!currentNode.leafs) {
+      currentNode.leafs = new Map();
+    }
+
+    const nextPart = `/${parts.join('/')}`;
+    currentNode.leafs[currentPart] = await this.setLeaf(node, nextPart, currentNode.leafs[currentPart]);
+
+    return currentNode;
+  }
+
+  async findRoot(path) {
+    if (!this.root || !this.root.leafs) {
+      return Result.fail('Pasta inicial nao encontrada ou ela esta vazia');
+    }
+
+    const parts = path.split('/').slice(1);
     let currentNode = this.root;
 
     for (const part of parts) {
       if (!currentNode.leafs || !currentNode.leafs[part]) {
-        return null; 
+        return Result.fail('Pasta nao encontrada');
       }
 
       currentNode = currentNode.leafs[part];
     }
 
-    return currentNode;
+    return Result.ok(currentNode);
   }
 }

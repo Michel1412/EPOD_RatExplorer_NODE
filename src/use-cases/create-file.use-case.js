@@ -1,4 +1,5 @@
-import { Result } from '../core/logic/Result';
+import { GenericTree } from "../domain/generic-tree.js";
+import { Result } from "../domain/result.js";
 
 export class CreateFileUseCase {
 
@@ -13,6 +14,12 @@ export class CreateFileUseCase {
   }
 
   isValidParams(fileData) {
-    return fileData && fileData.name && fileData.extencion && fileData.path;
+    return fileData && fileData.name && fileData.extension && fileData.path;
+  }
+
+
+  syncTree(tree) {
+    this.genericTree = this.genericTree.setRoot(tree);
+    return Result.ok(this.genericTree.getRoot());
   }
 }

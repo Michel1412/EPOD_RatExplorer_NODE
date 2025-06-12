@@ -1,17 +1,19 @@
-import Result from "../result";
+import {Result} from "../result.js";
 
 export class FolderBase {
-  constructor(name) {
-    this.name = name;
-    this.nodes = new Map();
+
+  constructor(data) {
+    this.name = data.name;
+    this.path = data.path || '/';
+    this.leafs = new Map();
   }
 
   getName() {
     return this.name;
   }
 
-  getNodes() {
-    return this.nodes;
+  getleafs() {
+    return this.leafs;
   }
 
   addNode(node) {
@@ -19,8 +21,8 @@ export class FolderBase {
       return Result.fail('[Folder - addNode()] Obrigatorio ter um Node e um Nome');
     }
 
-    this.nodes[node.getName()] = node;
+    this.leafs[node.getName()] = node;
 
-    return Result.ok(this.nodes);
+    return Result.ok(this.leafs);
   }
 }
