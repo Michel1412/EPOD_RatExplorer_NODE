@@ -1,22 +1,33 @@
+import { CreateFileUseCase } from '../use-cases/create-file.use-case.js';
+import { CreateFolderUseCase } from '../use-cases/create-folder.use-case.js';
+
 export class RatExplorer {
-    
+
     constructor(initialPath) {
         this.currentPath = `${initialPath || process.cwd()}/test`;
+        this.createFileUseCase = new CreateFileUseCase();
+        this.createFolderUseCase = new CreateFolderUseCase();
     }
 
-    createDirectory() {
+    createFolder() {
+        this.createFolderUseCase.execute();
+    }
+
+    createFile() {
+        this.createFileUseCase.execute();
+
         const fs = require('fs');
         const path = require('path');
 
-        const dirName = `dir_${Date.now()}`;
-        const dirPath = path.join(this.currentPath, dirName);
+        const fileName = `file_${Date.now()}.txt`;
+        const filePath = path.join(this.currentPath, fileName);
 
         try {
-            fs.mkdirSync(dirPath);
-            console.log(`Directory created: ${dirPath}`);
-            return dirPath;
+            fs.writeFileSync(filePath, 'This is a test file.');
+            console.log(`File created: ${filePath}`);
+            return filePath;
         } catch (error) {
-            console.error('Error creating directory:', error);
+            console.error('Error creating file:', error);
             return null;
         }
     }
