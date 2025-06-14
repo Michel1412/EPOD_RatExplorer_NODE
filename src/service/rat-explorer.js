@@ -1,15 +1,26 @@
-import path from 'path';
 import { GenericTree } from '../domain/generic-tree.js';
 import { CreateFileUseCase } from '../use-cases/create-file.use-case.js';
 import { CreateFolderUseCase } from '../use-cases/create-folder.use-case.js';
+import StorageService from './storage.service.js';
 
 export class RatExplorer {
 
-    constructor(initialPath) {
-        this.currentPath = `${initialPath || process.cwd()}/test`;
+    constructor(initialPath = '../storage') {
         this.createFileUseCase = new CreateFileUseCase();
         this.createFolderUseCase = new CreateFolderUseCase();
-        this.tree = new GenericTree();
+        this.storageService = new StorageService(initialPath);
+        this.tree = this.readStorageOrCreate();
+    }
+
+    async readStorageOrCreate() {
+        const tree = this.storageService.get();
+
+        if (!tree) {
+            this.storageService.upsert(new GenericTree());
+            return new GenericTree();
+        }
+
+        return tree;
     }
 
     async handleCreateCommand(data) {
@@ -25,7 +36,7 @@ export class RatExplorer {
                 break;
             case 'file':
             case 'fi':
-                this.createFile();
+                await this.createFile(data);
                 break;
             default:
                 console.error('Unknown type for create command:', data.type);
@@ -34,7 +45,7 @@ export class RatExplorer {
 
     async createFolder(data) {
         if (!data || typeof data.name !== 'string') {
-            console.error('Invalid folder data');
+            console.error('Nomo da Pasta invalido.');
             return;
         }
 
@@ -53,46 +64,30 @@ export class RatExplorer {
         this.syncTree(result.data);
     }
 
-    createFile() {
-        this.tree = this.createFileUseCase.execute();
-        this.syncTree();
-
-        const fs = require('fs');
-        const path = require('path');
-
-        const fileName = `file_${Date.now()}.txt`;
-        const filePath = path.join(this.currentPath, fileName);
-
-        try {
-            fs.writeFileSync(filePath, 'This is a test file.');
-            console.log(`File created: ${filePath}`);
-            return filePath;
-        } catch (error) {
-            console.error('Error creating file:', error);
-            return null;
+    async createFile(data) {
+        if (!data || typeof data.name !== 'string') {
+            console.error('Nomo da Pasta invalido.');
+            return;
         }
+
+        const fileData = {
+            name: data.name,
+            path: data.path || '/',
+            extension: data.extension || 'txt' 
+        }
+
+        const result = await this.createFileUseCase.execute(fileData);
+        
+        if (!result.success) {
+            console.error('Error creating file:', result.error);
+            return;
+        }
+
+        this.syncTree(result.data);
     }
 
-    listFiles() {
-        const fs = require('fs');
-        const path = require('path');
-
-        try {
-            const files = fs.readdirSync(this.currentPath);
-            return files.map(file => {
-                const filePath = path.join(this.currentPath, file);
-                const stats = fs.statSync(filePath);
-                return {
-                    name: file,
-                    isDirectory: stats.isDirectory(),
-                    size: stats.size,
-                    modified: stats.mtime
-                };
-            });
-        } catch (error) {
-            console.error('Error reading directory:', error);
-            return [];
-        }
+    async listFiles() {
+        return !!this.tree && !!this.tree.leafs ? this.tree : [];
     }
 
     navigateTo(newPath) {
@@ -135,5 +130,7 @@ export class RatExplorer {
         this.createFileUseCase.syncTree(this.tree);
         this.createFolderUseCase.syncTree(this.tree);
         console.log('[RatExplorer] Tree: ', JSON.stringify(this.tree, null, 2));
+
+        this.storageService.upsert(this.tree);
     }
 }

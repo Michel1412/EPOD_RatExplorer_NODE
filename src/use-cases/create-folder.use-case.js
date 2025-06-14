@@ -37,7 +37,7 @@ export class CreateFolderUseCase {
 
   async getRootToCreate(path) {
     console.log(`[CreateFolderUseCase - getRootToCreate] path: ${path}`);
-    if (!path || path === '/') {
+    if (!path || path === '/' || !path.includes('/')) {
       return this.genericTree.getRoot();
     }
 

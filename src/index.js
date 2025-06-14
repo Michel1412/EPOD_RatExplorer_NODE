@@ -23,12 +23,12 @@ const handleCommand = async (commandParts) => {
             // FELIPE VALIDA ISSO AQUI           |
             // FELIPE VALIDA ISSO AQUI           |
             // FELIPE VALIDA ISSO AQUI           v
-            console.log('create <type> <name> <path> - Create a new folder Types: "folder", "file"');
+            console.log('create <type> <name> <path> <ext> - Create a new folder Types: "folder", "file"');
             console.log('clean - Clear the console');
             console.log('navigate <path> - Navigate to a different directory');
             console.log('details <file> - Get details of a specific file');
             console.log('exit - Exit the application');
-            break;
+            break; 
         case 'create':
             const params = commandParts.slice(1);
 
@@ -40,7 +40,8 @@ const handleCommand = async (commandParts) => {
             const data = {
                 type: params[0],
                 name: params[1],
-                path: params[2] ? params[2] : '/'
+                path: params[2] ? params[2] : '/',
+                extension: params[3] ? params[3] : null
             }
 
             console.log(`Creating folder: ${JSON.stringify(data)}`);

@@ -1,20 +1,13 @@
 export class FileBase {
-    constructor(name, size, type) {
-        if (!name || !size || !type) {
-            throw new Error('Name, size, and type are required for FileBase');
-        }
-        
-        this.name = name;
-        this.size = size; 
-        this.type = type;
+
+    constructor(data) {
+        this.name = data.name;
+        this.path = data.path || '/';
+        this.extension = data.extension || 'txt'; 
     }
 
     getName() {
         return this.name;
-    }
-
-    getSize() {
-        return this.size;
     }
 
     getType() {
